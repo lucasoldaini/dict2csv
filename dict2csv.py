@@ -1,16 +1,7 @@
 import csv
 from StringIO import StringIO
 from math import ceil
-from collections import OrderedDict
-
-
-# accepted types as container:
-#     - dict, OrderedDict (column name will be the key)
-#     - list, tuple, set, frozenset
-#       (column will be a progressive index, starting with 0)
-DICT_TYPES = set((dict, OrderedDict))
-LIST_TYPES = set((list, tuple, frozenset, set))
-ALL_TYPES = set.union(DICT_TYPES, LIST_TYPES)
+from collections import Mapping, Sequence
 
 
 def __expand_container(cont, i, j, empty_sym=''):
@@ -36,7 +27,9 @@ def __recursive_insert_data(di, data_cont, col_index):
         col_index; if data_cont is not big enough to accommodate the
         data, it will be automatically expanded.
     """
-    if type(di) not in ALL_TYPES:
+    print type(di), isinstance(di, Mapping)
+
+    if not(isinstance(di, Mapping)) and not(isinstance(di, Sequence)):
         # reached the data, back up a position to insert it in!
         return col_index
 
@@ -44,7 +37,7 @@ def __recursive_insert_data(di, data_cont, col_index):
 
     # assign progressive index names starting from 0 if di
     # is a list-like object
-    di_iter = (di.iteritems() if type(di) in DICT_TYPES else enumerate(di))
+    di_iter = (di.iteritems() if isinstance(di, Mapping) else enumerate(di))
 
     for k, v in di_iter:
         # recursively insert data for the sublist of di
@@ -66,11 +59,11 @@ def __recursive_build_header((name, di), heads_cont, left, depth):
         the container heads_cont.
         The container is automatically expanded if needed.
     """
-    if type(di) not in ALL_TYPES:
+    if not(isinstance(di, Mapping)) or not(isinstance(di, Sequence)):
         return left
 
     right = left
-    di_iter = (di.iteritems() if type(di) in DICT_TYPES else enumerate(di))
+    di_iter = (di.iteritems() if isinstance(di, Mapping) else enumerate(di))
     for k, v in di_iter:
         right = __recursive_build_header((k, v), heads_cont, right, depth + 1)
 
